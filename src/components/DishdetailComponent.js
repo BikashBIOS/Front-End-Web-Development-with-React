@@ -1,15 +1,10 @@
 import React, {Component} from 'react';
-import { Card, CardImg, CardText, CardBody, CardTitle, Breadcrumb, BreadcrumbItem, Modal,
-  ModalHeader,
-  ModalBody,
-  Button,
-  Row,
-  Col,
-  Label } from 'reactstrap';
+import { Card, CardImg, CardText, CardBody, CardTitle, Breadcrumb, BreadcrumbItem, Modal, ModalHeader, ModalBody, Button, Row, Col, Label } from 'reactstrap';
 import {Link} from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import { Control, LocalForm, Errors } from "react-redux-form";
 import { Loading } from './LoadingComponent';
+import { baseUrl } from '../shared/baseUrl';
 
 
 const required = val => val && val.length;
@@ -17,49 +12,47 @@ const maxLength = len => val => !val || val.length <= len;
 const minLength = len => val => val && val.length >= len;
 
 
-  function RenderDish({dish}) {
-    
-    return (
-        <div className="col-12 col-md-5 m-1">
-          <Card>
-            <CardImg top src={dish.image} alt={dish.name} />
-            <CardBody>
-              <CardTitle>{dish.name}</CardTitle>
-              <CardText>{dish.description}</CardText>
-            </CardBody>
-          </Card>
-        </div>
-        
+function RenderDish({dish}) {
+  
+  return (
+      <div className="col-12 col-md-5 m-1">
+        <Card>
+          <CardImg top src={baseUrl + dish.image} alt={dish.name} />
+          <CardBody>
+            <CardTitle>{dish.name}</CardTitle>
+            <CardText>{dish.description}</CardText>
+          </CardBody>
+        </Card>
+      </div>
+      
+  );
+}
+
+function RenderComments({comments, postComment, dishId}){
+  if(comments!=null){
+    return(
+      <div className="col-12 col-md-5 m-1">
+        <h4>Comments</h4>
+        <ul className="list-unstyled">{comments.map((comment)=>{
+          return(
+            <li key={comment.id}>
+              <p>{comment.comment}</p>
+              <p>-- {comment.author}, {new Intl.DateTimeFormat("en-US", {year: "numeric",month: "short",day: "2-digit"}).format(
+                new Date(Date.parse(comment.date)))}</p>
+            </li>
+          );
+          })}
+        </ul>
+        <CommentForm dishId={dishId} postComment={postComment}/>
+      </div>
     );
   }
-
-  function RenderComments({comments, addComment, dishId}){
-    if(comments!=null){
-      return(
-        <div className="col-12 col-md-5 m-1">
-          <h4>Comments</h4>
-          <ul className="list-unstyled">{comments.map((comment)=>{
-            return(
-              <li key={comment.id}>
-                <p>{comment.comment}</p>
-                <p>-- {comment.author}, {new Intl.DateTimeFormat("en-US", {year: "numeric",month: "short",day: "2-digit"}).format(
-                  new Date(Date.parse(comment.date)))}</p>
-              </li>
-            );
-            })}
-          </ul>
-          <CommentForm dishId={dishId} addComment={addComment}/>
-        </div>
-      );
-      }
-      else{
-        return (
-          <div></div>
-        );
-      }
-      
+  else{
+    return (
+      <div></div>
+    );
   }
-
+}
 
 class CommentForm extends Component {
   constructor(props) {
@@ -78,7 +71,7 @@ class CommentForm extends Component {
   }
   handleSubmit(values) {
     this.toggleModal();
-    this.props.addComment(this.props.dishId, values.rating, values.author, values.comment);
+    this.props.postComment(this.props.dishId, values.rating, values.author, values.comment);
   }
   
   render() {
@@ -207,7 +200,7 @@ const DishDetail = (props) => {
         <div className="row">
           <RenderDish dish={props.dish}></RenderDish>
           <RenderComments comments={props.comments}
-          addComment={props.addComment}
+          postComment={props.postComment}
           dishId={props.dish.id}/>
             
 
